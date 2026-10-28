@@ -3,6 +3,7 @@
 
 # your actual resume and the profile derived from it
 resume.*
+resume_*.pdf
 my_resume.pdf
 profile.json
 !profile.example.json

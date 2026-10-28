@@ -1,70 +1,100 @@
-# jobhunt configuration. Everything tunable lives here — no editing Python.
+# Jobhunt configuration tuned for a third-year B.Tech student seeking
+# software internships, backend/full-stack roles, and suitable new-grad roles.
+# Everything tunable lives here — no editing Python.
 #
-# Tune `filters` first. It is deterministic, free, and it is what keeps the
-# LLM bill small: roughly 2000 raw postings -> 40 candidates before a single
-# token is spent.
+# Tune filters first. These deterministic rules reduce the number of jobs
+# sent to the LLM screener.
 
 filters:
-  # Title regexes, matched case-insensitively against the job title only.
-  # A title must match at least one include AND zero excludes.
-  #
-  # Gotcha: "sde" as a bare regex does NOT match "Software Development
-  # Engineer" — different words entirely. Use \bsde\b for the acronym and
-  # list the spelled-out variants separately, as below.
+  # Regexes match the job title only, case-insensitively.
+  # A title must match at least one include and zero excludes.
   include_titles:
-    - '\b(software|backend|back-end|server|platform|infrastructure|infra|systems|distributed|cloud)\b.*\bengineer\b'
-    - '\bengineer\b.*\b(backend|back-end|platform|infrastructure|infra|systems|distributed)\b'
+    # Core software engineering roles
+    - '\b(software|backend|back-end|full[ -]?stack|web|application|platform|cloud|infrastructure|systems|distributed)\b.*\b(engineer|developer|intern|internship|trainee|apprentice)\b'
+    - '\b(engineer|developer)\b.*\b(software|backend|back-end|full[ -]?stack|web|application|platform|cloud|infrastructure|systems|distributed)\b'
     - '\bsde\b'
     - '\bsde\s*-?\s*(i{1,3}|[123])\b'
-    - 'software development engineer'
-    - 'software engineer'
-    - 'site reliability engineer'
+    - '\bswe\s+intern\b'
+    - '\bsde\s+intern\b'
+    - '\bsoftware development engineer\b'
+    - '\bsoftware engineer\b'
+    - '\bsoftware engineering intern(ship)?\b'
+    - '\bsoftware development intern(ship)?\b'
+    - '\bsoftware developer\b'
+    - '\bbackend engineer\b'
+    - '\bbackend developer\b'
+    - '\bbackend intern(ship)?\b'
+    - '\bback-end engineer\b'
+    - '\bback-end developer\b'
+    - '\bback-end intern(ship)?\b'
+    - '\bfull[ -]?stack engineer\b'
+    - '\bfull[ -]?stack developer\b'
+    - '\bfull[ -]?stack intern(ship)?\b'
+    - '\b(frontend|front-end|front end)\b.*\b(engineer|developer|intern|internship)\b'
+    - '\b(engineer|developer|intern|internship)\b.*\b(frontend|front-end|front end)\b'
+    - '\bfrontend intern(ship)?\b'
+    - '\bfront-end intern(ship)?\b'
+    - '\bweb developer\b'
+    - '\bweb development intern(ship)?\b'
+    - '\bweb developer intern(ship)?\b'
+    - '\bapplication developer\b'
+    - '\bsite reliability engineer\b'
     - '\bsre\b'
-    - 'member of technical staff'
-    # systems / networking track — matches your DPDK, packet-processing and
-    # kernel background. Drop these if you widen away from low-level work.
+    - '\bmember of technical staff\b'
+    # Internship and university hiring titles that may omit a specialty
+    - '\b(engineering|technology|software|developer) intern\b'
+    - '\b(intern|internship)\b.*\b(software|engineering|developer|backend|back-end|full[ -]?stack|web)\b'
+    - '\bgraduate software engineer\b'
+    - '\bnew grad(uate)? software engineer\b'
+    - '\bentry[- ]level software engineer\b'
+    - '\bjunior software engineer\b'
+    - '\bassociate software engineer\b'
+    - '\bgraduate engineer trainee\b'
+    # Optional adjacent systems/C++ track
     - '\bnetwork(ing)?\s+(software\s+)?engineer\b'
-    - '\b(kernel|embedded|firmware|driver|packet|dataplane|data plane)\b.*\bengineer\b'
-    - '\bengineer\b.*\b(kernel|packet|dataplane|networking|performance)\b'
-    - '\bperformance engineer\b'
-    - '\bsystems engineer\b'
-    - '\bc\+\+\b.*\bengineer\b'
-    - '\bengineer\b.*\bc\+\+\b'
+    - '\b(kernel|embedded|firmware|driver|packet|dataplane|data plane)\b.*\b(engineer|intern)\b'
+    - '\b(performance|systems) engineer\b'
+    - '\bc\+\+\b.*\b(engineer|intern)\b'
+    - '\b(engineer|intern)\b.*\bc\+\+\b'
 
-  # Anything matching these is dropped even if an include matched.
+  # Drop senior/management and unrelated roles even if an include matched.
   exclude_titles:
-    - '\b(staff|principal|distinguished|fellow|architect)\b'      # too senior for now
-    # "Senior" at 2.5 years is a consistent 3-4 from the screener — dropping it
-    # here is free, dropping it after an LLM call is not. Delete this line once
-    # you are ~4 years in, or if you want to stretch-apply anyway.
+    - '\b(staff|principal|distinguished|fellow|architect)\b'
     - '\bsenior\b'
+    - '\b(lead|tech lead|team lead)\b'
     - '\b(director|vp|vice president|head of|chief|cto)\b'
     - '\b(manager|management)\b'
-    - '\b(intern|internship|apprentice|trainee)\b'                # too junior
-    - '\b(sales|account executive|marketing|recruit|support|success)\b'
-    - '\b(frontend|front-end|ios|android|mobile|game|designer)\b' # wrong discipline
+    - '\b(sales|account executive|marketing|recruiter|customer support|customer success)\b'
     - '\b(data scientist|machine learning scientist|research scientist)\b'
+    - '\b(ios|android|mobile|game designer|graphic designer|product designer)\b'
 
-  # Substrings matched against "<location> <title>", case-insensitive.
-  # Leave empty to accept every location.
+  # Substrings matched against "<location> <title>", case-insensitively.
   locations:
+    - india
     - bangalore
     - bengaluru
-    - india
+    - hyderabad
+    - pune
+    - gurugram
+    - gurgaon
+    - noida
+    - delhi
+    - mumbai
+    - chennai
+    - jalandhar
 
-  # If true, anything reading as remote passes the location gate.
+  # Allow remote roles even if their location string lacks an Indian city.
   allow_remote: true
 
-  # Drop postings older than this. Set to null to disable.
-  # Boards often re-stamp `updated_at`, so this is a soft signal, not a promise.
+  # Drop postings older than this; set to null to disable.
   max_age_days: 30
 
 # --- LLM stages -------------------------------------------------------------
-screen_batch_size: 8      # jobs per screening call. Higher = cheaper, sloppier.
-screen_jd_chars: 1400     # JD truncation for screening
-draft_jd_chars: 6000      # JD truncation for drafting
-score_threshold: 7.0      # below this, no draft and no digest slot
-max_per_digest: 5         # hard cap on expensive draft calls per run
+screen_batch_size: 8
+screen_jd_chars: 1400
+draft_jd_chars: 6000
+score_threshold: 7.0
+max_per_digest: 5
 
 # --- paths ------------------------------------------------------------------
 companies_file: companies.yaml
@@ -72,3 +102,4 @@ profile_file: profile.json
 seen_file: seen.json
 digest_file: out/digest.html
 tracker_csv: out/tracker.csv
+

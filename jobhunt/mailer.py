@@ -8,7 +8,7 @@ from email.message import EmailMessage
 
 def send(subject: str, html_body: str) -> None:
     host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-    port = int(os.getenv("SMTP_PORT", "587"))
+    port = int(os.getenv("SMTP_PORT", "465"))
     user = os.environ["SMTP_USER"]
     password = os.environ["SMTP_PASS"]
     to_addr = os.getenv("MAIL_TO", user)
@@ -20,8 +20,15 @@ def send(subject: str, html_body: str) -> None:
     msg.set_content("This digest is HTML. Open it in an HTML-capable client.")
     msg.add_alternative(html_body, subtype="html")
 
-    with smtplib.SMTP(host, port, timeout=30) as s:
-        s.starttls()
-        s.login(user, password)
-        s.send_message(msg)
+    if port == 465:
+        # SSL directly (works on networks where 587 STARTTLS is blocked)
+        with smtplib.SMTP_SSL(host, port, timeout=30) as s:
+            s.login(user, password)
+            s.send_message(msg)
+    else:
+        # STARTTLS (e.g. port 587)
+        with smtplib.SMTP(host, port, timeout=30) as s:
+            s.starttls()
+            s.login(user, password)
+            s.send_message(msg)
     print(f"  mailed -> {to_addr}")

@@ -5,6 +5,9 @@ HTTP hop. Includes deliberate junk (wrong seniority, wrong city, wrong
 function, stale posting, an unlisted Ashby draft) so the filters have
 something to actually reject.
 
+Also includes genuine internship and new-grad fixtures to exercise the
+LLM screener with student-appropriate roles.
+
 Dates are computed relative to *now*, never hardcoded. A fixture with a
 hardcoded date silently ages past `max_age_days` and one day your demo
 returns zero jobs for no visible reason. `_STALE` is the only old one, and
@@ -56,6 +59,37 @@ petabyte-scale storage layer.</p><ul><li>10+ years of experience required</li>
 _FRONTEND_JD = """<p>Build delightful UI in React and TypeScript. Own our design
 system, animations and accessibility work.</p>"""
 
+_INTERN_JD = """<p>We are looking for a <strong>Software Engineering Intern</strong>
+(Summer 2027) to join our India engineering team in Bengaluru.</p>
+<p><strong>What you will build</strong></p><ul>
+<li>Work on real product features in our React + Node.js stack</li>
+<li>Build and ship REST API endpoints with Express.js and MongoDB</li>
+<li>Participate in code reviews, design discussions and sprint demos</li></ul>
+<p><strong>Who we are looking for</strong></p><ul>
+<li>Currently pursuing B.Tech / B.E. / M.Tech (graduating 2026, 2027, or 2028)</li>
+<li>Solid understanding of JavaScript, HTML, CSS</li>
+<li>Familiarity with React or another frontend framework</li>
+<li>Strong problem-solving skills; DSA proficiency preferred</li></ul>"""
+
+_BACKEND_INTERN_JD = """<p>Join our <strong>Backend Engineering Intern</strong> programme
+in Hyderabad. You will work with the Payments API team.</p><ul>
+<li>Design and implement REST API endpoints using Node.js and Express</li>
+<li>Write unit and integration tests; participate in code reviews</li>
+<li>Learn about distributed systems, event-driven architecture, and Kafka</li></ul>
+<p><strong>Requirements</strong></p><ul>
+<li>Pursuing B.Tech / M.Tech, graduating 2027 or 2028</li>
+<li>Proficiency in JavaScript or Python; experience with Node.js is a plus</li>
+<li>Understanding of databases -- SQL or NoSQL</li>
+<li>LeetCode / competitive programming experience preferred</li></ul>"""
+
+_NEW_GRAD_JD = """<p>Graduate Software Engineer -- Full Stack (Bengaluru)</p>
+<p>We hire new graduates and recent graduates (graduated within the last 12 months
+OR graduating in 2027/2028) into our Full Stack Engineering programme.</p><ul>
+<li>React.js / Next.js frontend development</li>
+<li>Node.js / Express backend services</li>
+<li>MongoDB / PostgreSQL data modelling</li>
+<li>REST API design and integration</li></ul>"""
+
 GREENHOUSE = {
     "acme-edge": {"jobs": [
         # keeper: right level, right city, fresh
@@ -84,19 +118,24 @@ GREENHOUSE = {
          "absolute_url": "https://boards.greenhouse.io/acme-edge/jobs/5501005",
          "location": {"name": "Remote - India"},
          "updated_at": _gh(STALE_DAYS), "content": _BACKEND_JD},
+        # keeper: genuine internship posting in Bengaluru
+        {"id": 5501006, "title": "Software Engineering Intern",
+         "absolute_url": "https://boards.greenhouse.io/acme-edge/jobs/5501006",
+         "location": {"name": "Bengaluru, India"},
+         "updated_at": _gh(1), "content": _INTERN_JD},
     ]},
     "novapay": {"jobs": [
-        # keeper: "SDE" spelled out — the bare regex "sde" would miss this
+        # keeper: "SDE" spelled out -- the bare regex "sde" would miss this
         {"id": 7702001, "title": "Software Development Engineer, Core Infra",
          "absolute_url": "https://boards.greenhouse.io/novapay/jobs/7702001",
          "location": {"name": "Bengaluru, India"},
          "updated_at": _gh(1),
          "content": _BACKEND_JD + "<p>Java, Kafka, Postgres. Hybrid, 3 days in office.</p>"},
-        # junk: wrong discipline
-        {"id": 7702002, "title": "Frontend Engineer, Design Systems",
+        # keeper: new-grad role with React/Node stack -- good match
+        {"id": 7702002, "title": "Graduate Software Engineer",
          "absolute_url": "https://boards.greenhouse.io/novapay/jobs/7702002",
-         "location": {"name": "Bengaluru, India"},
-         "updated_at": _gh(2), "content": _FRONTEND_JD},
+         "location": {"name": "Hyderabad, India"},
+         "updated_at": _gh(2), "content": _NEW_GRAD_JD},
     ]},
 }
 
@@ -135,6 +174,15 @@ LEVER = {
                              "multi-region Kubernetes fleet. Terraform, Prometheus, Go.",
          "lists": [{"text": "Nice to have",
                     "content": "<li>CDN or edge networking background</li>"}]},
+        # Intern posting via Lever
+        {"id": "a1b2c3d4-1111-4aaa-9999-000000000004",
+         "text": "Backend Engineering Intern",
+         "hostedUrl": "https://jobs.lever.co/quantstack/a1b2c3d4-1111-4aaa-9999-000000000004",
+         "categories": {"location": "Hyderabad, India", "team": "Payments",
+                        "commitment": "Internship"},
+         "createdAt": _lever(3),
+         "descriptionPlain": _BACKEND_INTERN_JD,
+         "lists": []},
     ],
 }
 
@@ -145,7 +193,7 @@ ASHBY = {
          "location": "Bengaluru, India", "isListed": True,
          "jobUrl": "https://jobs.ashbyhq.com/helioscale/9f8e7d6c-2222-4bbb-8888-000000000001",
          "publishedAt": _ashby(1),
-         "compensation": {"compensationTierSummary": "₹32L – ₹48L"},
+         "compensation": {"compensationTierSummary": "Rs32L - Rs48L"},
          "descriptionPlain": "Work on our anycast network and HTTP proxy layer. "
                              "You will tune TCP congestion control, build DNS "
                              "steering logic and reduce p99 latency across POPs. "

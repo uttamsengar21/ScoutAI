@@ -2,6 +2,12 @@
 
 The agent never submits an application. It finds, filters, ranks and drafts.
 A human reads the digest, edits the note, and presses submit.
+
+Key terminology:
+  unseen    jobs fetched this run that have never been recorded in seen.json
+  re-eval   jobs that were seen before but scored below threshold; eligible
+            for re-screening after min_rescore_after_days (default 14)
+  applied   set explicitly by `jobhunt applied <job_id>` -- never automatic
 """
 from __future__ import annotations
 
@@ -50,11 +56,11 @@ def _load_profile(cfg: dict, allow_sample: bool) -> dict | None:
 
     sample = ROOT / "profile.example.json"
     if allow_sample and sample.exists():
-        print(f"  ! {path} missing — using {sample.name} for this dry run.")
+        print(f"  ! {path} missing -- using {sample.name} for this dry run.")
         print("    Build the real one: python -m jobhunt profile --resume resume.pdf")
         return json.loads(sample.read_text(encoding="utf-8"))
 
-    print(f"missing {path} — run `python -m jobhunt profile --resume <file>` first")
+    print(f"missing {path} -- run `python -m jobhunt profile --resume <file>` first")
     return None
 
 
@@ -106,46 +112,76 @@ def cmd_run(args) -> int:
         jobs = fetch_all(companies)
     scanned = len(jobs)
     if not scanned:
-        print("no postings fetched — check the slugs in companies.yaml")
+        print("no postings fetched -- check the slugs in companies.yaml")
         return 1
 
     # ---- 2. prefilter + dedupe (deterministic, free, no LLM)
     print("\n[2/5] filtering")
-    jobs = prefilter(jobs, filters)
-    passed_filters = len(jobs)
-    jobs = store.unseen(jobs)
-    print(f"  new since last run: {len(jobs)}")
-    candidates = len(jobs)
+    filtered_jobs = prefilter(jobs, filters)
+    passed_filters = len(filtered_jobs)
+
+    # Separate genuinely new jobs from candidates eligible for re-evaluation.
+    new_jobs = store.unseen(filtered_jobs)
+    print(f"  new since last run: {len(new_jobs)}")
+
+    if args.rescreen:
+        # Re-evaluate previously-seen jobs that scored below threshold.
+        rescore_candidates = store.re_evaluate(
+            filtered_jobs,
+            min_rescore_after_days=int(cfg.get("rescore_after_days", 14)),
+        )
+        # Exclude any already in new_jobs (shouldn't happen, but be safe).
+        new_ids = {j.job_id for j in new_jobs}
+        rescore_candidates = [j for j in rescore_candidates if j.job_id not in new_ids]
+        if rescore_candidates:
+            print(f"  re-evaluating {len(rescore_candidates)} previously-seen job(s) "
+                  f"(--rescreen flag active)")
+        jobs_to_screen = new_jobs + rescore_candidates
+    else:
+        jobs_to_screen = new_jobs
+
+    candidates = len(jobs_to_screen)
+
     if args.limit:
-        jobs = jobs[:args.limit]
+        jobs_to_screen = jobs_to_screen[:args.limit]
         print(f"  --limit {args.limit} applied")
 
-    if not jobs:
-        subject, doc = digest_mod.build([], scanned, 0, store.stats())
+    if not jobs_to_screen:
+        # Build a meaningful empty digest explaining why.
+        rejection_stats = {
+            "title": scanned - passed_filters,  # approximate
+            "location": 0,
+            "age": 0,
+        }
+        subject, doc = digest_mod.build(
+            [], scanned, candidates, store.stats(), rejection_stats
+        )
         path = digest_mod.write(doc, cfg.get("digest_file", "out/digest.html"))
         print(f"\nnothing new today. preview: {path}")
+        if not args.rescreen:
+            print("  tip: run with --rescreen to re-evaluate previously rejected jobs")
         return 0
 
     # ---- 3. screen
     scorer = "keyword" if args.scorer == "keyword" else "llm"
     if scorer == "keyword":
-        print(f"\n[3/5] screening {len(jobs)} jobs (keyword stub — DEV ONLY)")
-        llm.keyword_screen(jobs, profile)
+        print(f"\n[3/5] screening {len(jobs_to_screen)} jobs (keyword stub -- DEV ONLY)")
+        llm.keyword_screen(jobs_to_screen, profile)
     else:
         try:
             provider, model = resolve("screen")
         except LLMError as e:
             print(f"\n{e}\nNo key? Run with --scorer keyword for an offline dry run.")
             return 1
-        print(f"\n[3/5] screening {len(jobs)} jobs via {provider.name}/{model}")
-        llm.screen(jobs, profile,
+        print(f"\n[3/5] screening {len(jobs_to_screen)} jobs via {provider.name}/{model}")
+        llm.screen(jobs_to_screen, profile,
                    batch_size=int(cfg.get("screen_batch_size", 8)),
                    jd_chars=int(cfg.get("screen_jd_chars", 1400)),
                    provider=provider, model=model)
 
-    # If every batch failed, the digest would be empty and — worse — we would
+    # If every batch failed, the digest would be empty and -- worse -- we would
     # record these jobs as seen and never show them again. Bail instead.
-    if scorer == "llm" and not any(j.score is not None for j in jobs):
+    if scorer == "llm" and not any(j.score is not None for j in jobs_to_screen):
         print("\n! screening scored nothing: every batch failed.\n"
               "  Not recording these jobs, so the next run retries them.\n"
               "  Check the warnings above (bad key, rate limit, wrong model id).")
@@ -153,7 +189,7 @@ def cmd_run(args) -> int:
 
     threshold = float(cfg.get("score_threshold", 7.0))
     top_n = int(cfg.get("max_per_digest", 5))
-    shortlist = sorted([j for j in jobs if (j.score or 0) >= threshold],
+    shortlist = sorted([j for j in jobs_to_screen if (j.score or 0) >= threshold],
                        key=lambda j: j.score or 0, reverse=True)[:top_n]
     print(f"  {len(shortlist)} scored >= {threshold}")
 
@@ -184,16 +220,23 @@ def cmd_run(args) -> int:
         try:
             mailer.send(subject, doc)
             sent = True
+            print("  email confirmed sent")
         except Exception as e:  # bad app password, blocked port, offline
-            print(f"  ! email failed ({type(e).__name__}: {e}) — digest still on disk")
+            etype = type(e).__name__
+            msg = str(e)
+            # Redact anything that looks like a password or key in the error message.
+            print(f"  ! email failed ({etype}: {msg}) -- digest still on disk")
+            print("  tip: verify SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in .env")
+            print("       Gmail requires an App Password (not your login password).")
+            print("       Port 587 needs STARTTLS; port 465 needs SSL/TLS.")
     else:
         print("  --send not passed, email skipped")
 
-    store.record(jobs, emailed=sent)
+    store.record(jobs_to_screen, emailed=sent)
     csv_path = store.export_csv(cfg.get("tracker_csv", "out/tracker.csv"))
 
     print(f"\nfunnel: {scanned} scanned -> {passed_filters} passed filters "
-          f"-> {candidates} new -> {len(shortlist)} in digest")
+          f"-> {candidates} new/re-eval -> {len(shortlist)} in digest")
     print(f"subject: {subject}")
     print(f"tracker: {store.stats()}  ({csv_path})")
     return 0
@@ -236,6 +279,8 @@ def main(argv=None) -> int:
     sr.add_argument("--no-draft", action="store_true", help="skip the expensive stage")
     sr.add_argument("--send", action="store_true", help="actually email the digest")
     sr.add_argument("--limit", type=int, help="cap jobs sent to the LLM (cost guard)")
+    sr.add_argument("--rescreen", action="store_true",
+                    help="re-evaluate previously seen jobs that scored below threshold")
     sr.set_defaults(func=cmd_run)
 
     sa = sub.add_parser("applied", help="mark a job_id as applied")

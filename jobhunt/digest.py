@@ -1,4 +1,4 @@
-"""Build the daily HTML digest. Inline CSS only — Gmail strips <style> blocks."""
+"""Build the daily HTML digest. Inline CSS only -- Gmail strips <style> blocks."""
 from __future__ import annotations
 
 import html
@@ -13,6 +13,7 @@ LINE = "#262b36"
 TEXT = "#e6e8ec"
 MUTED = "#8b93a3"
 ACCENT = "#7c9cff"
+WARN = "#d29922"
 
 
 def _badge(score: float | None) -> str:
@@ -70,32 +71,77 @@ def _card(j: Job) -> str:
   <div style="margin-top:16px;">
     <a href="{html.escape(j.url)}" style="display:inline-block;background:{ACCENT};
        color:#0f1115;font-weight:700;font-size:14px;text-decoration:none;
-       padding:10px 18px;border-radius:8px;">Open &amp; apply →</a>
+       padding:10px 18px;border-radius:8px;">Open &amp; apply &rarr;</a>
     <span style="color:{MUTED};font-size:11px;margin-left:10px;">{html.escape(j.job_id)}</span>
   </div>
 </div>"""
 
 
-def build(jobs: list[Job], scanned: int, candidates: int, stats: dict) -> tuple[str, str]:
+def _empty_card(scanned: int, candidates: int, stats: dict, rejection_stats: dict | None) -> str:
+    """Informative card explaining why no jobs appear in the digest."""
+    tracked = stats.get("tracked", 0)
+    screened = stats.get("screened", 0)
+    applied = stats.get("applied", 0)
+
+    lines = [
+        f"Scanned <strong>{scanned}</strong> postings from configured boards.",
+    ]
+    if rejection_stats:
+        title_n = rejection_stats.get("title", 0)
+        loc_n = rejection_stats.get("location", 0)
+        stale_n = rejection_stats.get("age", 0)
+        if title_n or loc_n or stale_n:
+            lines.append(
+                f"Deterministic filter dropped: "
+                f"<strong>{title_n}</strong> by title, "
+                f"<strong>{loc_n}</strong> by location, "
+                f"<strong>{stale_n}</strong> stale."
+            )
+    if candidates > 0:
+        lines.append(
+            f"<strong>{candidates}</strong> passed filters but were already seen "
+            f"(tracked: {tracked}, screened: {screened}, applied: {applied})."
+        )
+    else:
+        lines.append("No new postings cleared all filters today.")
+
+    lines.append(
+        "Run with <code>--mock --scorer keyword</code> to test the pipeline offline, "
+        "or wait for boards to post new openings."
+    )
+
+    content = "".join(f'<p style="margin:4px 0;">{l}</p>' for l in lines)
+    return (
+        f'<div style="background:{CARD};border:1px solid {LINE};border-radius:12px;'
+        f'padding:24px;color:{TEXT};font-size:14px;line-height:1.7;">'
+        f'{content}</div>'
+    )
+
+
+def build(
+    jobs: list[Job],
+    scanned: int,
+    candidates: int,
+    stats: dict,
+    rejection_stats: dict | None = None,
+) -> tuple[str, str]:
     today = datetime.now().strftime("%d %b %Y")
-    subject = (f"{len(jobs)} job{'s' if len(jobs) != 1 else ''} worth your time — {today}"
-               if jobs else f"No new matches today — {today}")
+    subject = (f"{len(jobs)} job{'s' if len(jobs) != 1 else ''} worth your time -- {today}"
+               if jobs else f"No new matches today -- {today}")
 
     if jobs:
         body = "".join(_card(j) for j in jobs)
     else:
-        body = (f'<div style="background:{CARD};border:1px solid {LINE};border-radius:12px;'
-                f'padding:24px;color:{MUTED};font-size:14px;">Scanned {scanned} postings, '
-                f'nothing cleared the bar today. Boards are quiet on weekends.</div>')
+        body = _empty_card(scanned, candidates, stats, rejection_stats)
 
     html_doc = f"""<!doctype html><html><body style="margin:0;padding:20px;background:{BG};
 font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <div style="max-width:640px;margin:0 auto;">
   <div style="color:{TEXT};font-size:22px;font-weight:800;">Your job digest</div>
   <div style="color:{MUTED};font-size:13px;margin:6px 0 20px 0;">
-    {today} · scanned {scanned} postings · {candidates} passed filters ·
+    {today} &middot; scanned {scanned} postings &middot; {candidates} passed filters &middot;
     {len(jobs)} made the cut<br>
-    tracker: {stats.get('tracked', 0)} seen · {stats.get('applied', 0)} applied
+    tracker: {stats.get('tracked', 0)} seen &middot; {stats.get('applied', 0)} applied
   </div>
   {body}
   <div style="color:{MUTED};font-size:11px;line-height:1.6;margin-top:18px;

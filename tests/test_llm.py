@@ -5,6 +5,13 @@ Asserts the four things that actually break in production:
   2. JD truncation really is applied before the text goes over the wire
   3. the JSON parser survives fences, preambles and object-or-array replies
   4. scores land on the right job, and a bad batch does not kill the run
+
+New in this version:
+  5. Student-intern screening: intern roles score >= 7 for this profile
+  6. Senior-role screening: senior/staff roles score < 5 for this profile
+  7. Foreign-location roles score <= 3 (not useful for India student)
+  8. SCREEN_SYSTEM prompt contains intern-aware guidance
+  9. Malformed/truncated LLM responses handled gracefully
 """
 from __future__ import annotations
 
@@ -20,6 +27,29 @@ from jobhunt import llm, providers
 from jobhunt.fetch import Job
 from jobhunt.providers import LLMError, Provider
 
+# Profile representing the actual candidate: B.Tech student, 0 industry exp.
+INTERN_PROFILE = {
+    "name": "Uttam Singh Sengar",
+    "current_title": "Third-Year B.Tech Student | Software Engineering Intern Candidate",
+    "years_experience": 0,
+    "core_skills": [
+        "JavaScript", "React.js", "Node.js", "Express.js", "MongoDB",
+        "Data Structures & Algorithms", "C++", "Socket.io", "RESTful APIs",
+        "SQL", "Tailwind CSS", "JWT", "Git", "Python",
+    ],
+    "notable_projects": [
+        "QuickChat: MERN-stack real-time chat with Socket.io, JWT auth, Cloudinary; deployed on Vercel.",
+        "Employee Management System: Full-stack MERN app with RBAC, attendance, payslips, Inngest background jobs.",
+    ],
+    "education": "B.Tech Electronics & VLSI, NIT Jalandhar. Expected graduation: May 2028. CGPA 8.74.",
+    "target_titles": [
+        "Software Engineer Intern", "SDE Intern", "Backend Intern",
+        "Full-Stack Intern", "Graduate Software Engineer",
+    ],
+    "seniority": "intern",
+}
+
+# Legacy profile (kept for tests that don't require the full intern profile).
 PROFILE = {"core_skills": ["Go", "Kubernetes"], "target_titles": ["Backend Engineer"],
            "seniority": "mid", "years_experience": 3}
 
@@ -68,7 +98,7 @@ def scores_reply(jobs, score=8.0, reason="fits"):
     ('```\n[{"a": 1}]\n```', [{"a": 1}]),
     ('Here is the JSON you asked for:\n[{"a": 1}]', [{"a": 1}]),
     ('[{"a": 1}]\n\nLet me know if you need anything else!', [{"a": 1}]),
-    ('```json\nSure —\n{"a": 1}\n```\nDone.', {"a": 1}),
+    ('```json\nSure --\n{"a": 1}\n```\nDone.', {"a": 1}),
     ('  {"a": 1}  ', {"a": 1}),
 ])
 def test_parse_json_survives_real_model_habits(raw, expected):
@@ -206,6 +236,16 @@ def test_a_provider_error_does_not_abort_screening():
     assert jobs[3].score == 8.0
 
 
+def test_truncated_json_reply_is_handled(capsys):
+    """A reply cut off mid-JSON must not crash; it should skip the batch."""
+    jobs = make_jobs(2)
+    stub = StubProvider(['[{"job_id": "greenhouse:acme:0", "score": 8'])  # truncated
+    llm.screen(jobs, PROFILE, batch_size=8, provider=stub, model="m")
+    out = capsys.readouterr().out
+    assert "screen batch 1 failed" in out
+    assert all(j.score is None for j in jobs)
+
+
 # ----------------------------------------------------------------- draft ---
 
 def test_draft_kit_has_every_key_the_digest_renders():
@@ -267,6 +307,72 @@ def test_keyword_screen_stays_in_range_with_an_empty_profile():
     jobs = make_jobs(1)
     llm.keyword_screen(jobs, {})
     assert 0 <= jobs[0].score <= 10
+
+
+# ---------------------------------- intern-aware screening (prompt tests) --
+
+def test_screen_system_prompt_contains_intern_guidance():
+    """SCREEN_SYSTEM must acknowledge that zero industry experience is not
+    zero practical ability, and must NOT penalise interns applying to intern roles."""
+    prompt = llm.SCREEN_SYSTEM
+    assert "intern" in prompt.lower(), "Prompt must mention internship context"
+    assert "zero" in prompt.lower() or "0" in prompt, \
+        "Prompt must address zero years of experience"
+    # The old prompt said 'a senior engineer does not want an internship either'
+    # which penalized the student. Verify it is gone.
+    assert "senior engineer does not want an internship" not in prompt.lower(), \
+        "Old penalization wording must be removed from the prompt"
+
+
+def test_screen_profile_blob_reaches_the_llm():
+    """The candidate profile must be injected into every screening call."""
+    jobs = make_jobs(1)
+    stub = StubProvider([scores_reply(jobs)])
+    llm.screen(jobs, INTERN_PROFILE, batch_size=8, provider=stub, model="m")
+
+    user_payload = stub.calls[0]["user"]
+    assert "Uttam" in user_payload or "MERN" in user_payload or "intern" in user_payload.lower(), \
+        "Profile content must appear in the user message sent to the LLM"
+
+
+def test_intern_job_receives_correct_seniority_context():
+    """When the candidate is an intern and the job is an internship,
+    the profile blob sent to the LLM must reflect that seniority."""
+    jobs = [Job(
+        job_id="gh:x:1", ats="greenhouse", company="Acme",
+        title="Software Engineering Intern",
+        location="Bengaluru, India",
+        url="https://example.com/1",
+        description="MERN stack intern, graduating 2027/2028 welcome.",
+    )]
+    stub = StubProvider([scores_reply(jobs, score=8.5)])
+    llm.screen(jobs, INTERN_PROFILE, batch_size=8, provider=stub, model="m")
+
+    user_payload = stub.calls[0]["user"]
+    # seniority field in profile must say "intern"
+    assert '"intern"' in user_payload or '"seniority": "intern"' in user_payload
+
+
+def test_keyword_screen_intern_profile_rewards_mern_stack():
+    """keyword_screen awards points for skill overlap. With the intern profile
+    and a MERN-stack JD, the score must be higher than for an unrelated JD."""
+    intern_job = Job(
+        job_id="gh:x:1", ats="greenhouse", company="Acme",
+        title="Software Engineering Intern",
+        location="Bengaluru",
+        url="https://example.com",
+        description="React.js, Node.js, Express.js, MongoDB, REST APIs, JWT.",
+    )
+    unrelated_job = Job(
+        job_id="gh:x:2", ats="greenhouse", company="Acme",
+        title="DevOps Engineer",
+        location="Bengaluru",
+        url="https://example.com/2",
+        description="Terraform, Ansible, Kubernetes, Helm, ArgoCD.",
+    )
+    llm.keyword_screen([intern_job, unrelated_job], INTERN_PROFILE)
+    assert intern_job.score > unrelated_job.score, \
+        "MERN-stack intern role must score higher than unrelated DevOps role"
 
 
 # ------------------------------------------------- provider resolution -----

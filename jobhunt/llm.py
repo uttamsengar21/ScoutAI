@@ -48,7 +48,7 @@ def parse_json(raw: str) -> Any:
         pass
     # Preamble before the payload, or trailing commentary after it.
     candidates = []
-    for opener, closer in (("[", "]"), ("{", "}")):
+    for opener, closer in ("[", "]"), ("{", "}"):
         i, k = cleaned.find(opener), cleaned.rfind(closer)
         if i != -1 and k > i:
             candidates.append((i, cleaned[i:k + 1]))
@@ -120,34 +120,44 @@ def build_profile(resume_bytes: bytes | None = None, resume_text: str | None = N
 
 # ----------------------------------------------------------------- screen ---
 
-SCREEN_SYSTEM = """You screen job postings for one candidate. You are strict.
+SCREEN_SYSTEM = """You screen job postings for one candidate who is a third-year
+undergraduate student (B.Tech, graduating May 2028) seeking software engineering
+internships and suitable entry-level/new-grad roles. Be accurate, not encouraging.
 
-Score 0-10 on genuine fit:
-  9-10  strong match, candidate clears the bar and the role is a step up
-  7-8   good match, worth applying
-  5-6   plausible but real gaps
-  0-4   wrong seniority, wrong stack, or a hard requirement the candidate lacks
+SCORING RUBRIC (0-10):
+  9-10  Excellent fit: posting explicitly targets students/interns at this level,
+        the candidate's tech stack matches, no blocking eligibility restrictions.
+  7-8   Good fit: internship or entry-level role, strong technology overlap, minor
+        addressable gaps.
+  5-6   Plausible: some relevant skills, but real gaps (unfamiliar stack, stated
+        experience requirement the candidate cannot fully meet, partial location fit).
+  0-4   Poor fit: requires multiple years of industry experience, wrong location
+        with no flexibility, or a hard requirement the candidate cannot meet.
 
-Seniority mismatch is the most common failure: a 3-year engineer scoring an 8
-on a Staff role is wrong. Penalise it hard, in both directions — a senior
-engineer does not want an internship either. Do the same for hard requirements
-the candidate plainly does not meet: security clearance, a specific degree, a
-named technology with a year count they cannot hit, or a country they cannot
-work in.
-
-Do not inflate scores to be encouraging. Most postings are a 4.
+CRITICAL EVALUATION RULES:
+1. An internship or new-grad role is NOT a seniority mismatch for this student.
+   Evaluate on tech fit and eligibility -- not on missing professional experience.
+2. The candidate has ZERO years of industry experience but has built two full-stack
+   deployed projects (MERN real-time chat app, Employee Management System with RBAC
+   and event-driven background jobs) and solved 500+ LeetCode problems. Zero industry
+   experience does NOT mean zero practical ability.
+3. A role requiring "2+ years of professional experience" IS a real gap -- score <=5.
+4. A full-time permanent role in US, UK, Ireland, or another country where the
+   candidate cannot legally work as a student intern -- score <=3.
+5. If an explicit graduation-year eligibility window excludes May 2028 -- score <=3.
+6. Score only on facts stated in the profile and job description. No assumptions.
 
 Return ONLY a JSON array, one object per job, no prose:
 [{"job_id": str, "score": number, "reason": str}]
-Echo `job_id` back exactly as given. `reason` is one sentence, max 20 words,
-concrete about the deciding factor."""
+Echo `job_id` back exactly as given. `reason` is one sentence (max 25 words),
+naming the deciding factor (tech overlap, experience gap, location, eligibility)."""
 
 
 def screen(jobs: list[Job], profile: dict, batch_size: int = 8, jd_chars: int = 1400,
            provider: Provider | None = None, model: str | None = None) -> list[Job]:
     """Stage 1: score every surviving job. Mutates and returns `jobs`.
 
-    A batch that fails to parse logs a warning and is skipped — one bad reply
+    A batch that fails to parse logs a warning and is skipped -- one bad reply
     must not take down the whole run.
     """
     if provider is None or model is None:
@@ -179,7 +189,7 @@ def screen(jobs: list[Job], profile: dict, batch_size: int = 8, jd_chars: int = 
                 if jid:
                     results[str(jid)] = r
         except (LLMError, ValueError, KeyError, TypeError) as e:
-            print(f"  ! screen batch {n} failed ({type(e).__name__}: {e}) — skipping")
+            print(f"  ! screen batch {n} failed ({type(e).__name__}: {e}) -- skipping")
             continue
 
         for j in batch:
