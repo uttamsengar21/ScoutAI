@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎯 ScoutAI
+#  ScoutAI
 
 ### Autonomous, LLM-Powered Career Search & Application Agent
 
