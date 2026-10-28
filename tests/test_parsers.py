@@ -27,11 +27,11 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from jobhunt import mock
-from jobhunt.fetch import Job, parse_ashby, parse_greenhouse, parse_lever, strip_html
-from jobhunt.mock import fetch_all_mock
-from jobhunt.prefilter import prefilter
-from jobhunt.store import Store
+from scoutai import mock
+from scoutai.fetch import Job, parse_ashby, parse_greenhouse, parse_lever, strip_html
+from scoutai.mock import fetch_all_mock
+from scoutai.prefilter import prefilter
+from scoutai.store import Store
 
 CONFIG = yaml.safe_load((Path(__file__).resolve().parent.parent / "config.yaml")
                         .read_text(encoding="utf-8"))

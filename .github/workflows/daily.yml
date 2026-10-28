@@ -12,7 +12,7 @@ on:
         default: false
 
 concurrency:
-  group: jobhunt-daily
+  group: scoutai-daily
   cancel-in-progress: false
 
 permissions:
@@ -30,9 +30,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: seen.json
-          key: jobhunt-seen-${{ github.run_id }}
+          key: scoutai-seen-${{ github.run_id }}
           restore-keys: |
-            jobhunt-seen-
+            scoutai-seen-
 
       - uses: actions/setup-python@v5
         with:
@@ -70,9 +70,9 @@ jobs:
           MAIL_TO: ${{ secrets.MAIL_TO }}
         run: |
           if [ "${{ inputs.dry_run }}" = "true" ]; then
-            python -m jobhunt run
+            python -m scoutai run
           else
-            python -m jobhunt run --send
+            python -m scoutai run --send
           fi
 
       - name: Upload digest artifact

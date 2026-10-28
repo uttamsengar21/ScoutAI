@@ -5,7 +5,7 @@ Terminology (important — do not conflate these):
              Seeing a job does not imply the candidate applied.
   screened  The job has been sent to the LLM screener and has a score.
   emailed   The job appeared in an emailed digest (score >= threshold).
-  applied   The candidate manually submitted an application via `jobhunt applied <id>`.
+  applied   The candidate manually submitted an application via `scoutai applied <id>`.
 
 A job is never marked applied automatically. Only the human triggers that.
 

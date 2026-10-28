@@ -1,4 +1,4 @@
-"""jobhunt CLI: profile -> fetch -> prefilter -> screen -> draft -> digest -> mail.
+"""ScoutAI CLI: profile -> fetch -> prefilter -> screen -> draft -> digest -> mail.
 
 The agent never submits an application. It finds, filters, ranks and drafts.
 A human reads the digest, edits the note, and presses submit.
@@ -7,7 +7,7 @@ Key terminology:
   unseen    jobs fetched this run that have never been recorded in seen.json
   re-eval   jobs that were seen before but scored below threshold; eligible
             for re-screening after min_rescore_after_days (default 14)
-  applied   set explicitly by `jobhunt applied <job_id>` -- never automatic
+  applied   set explicitly by `scoutai applied <job_id>` -- never automatic
 """
 from __future__ import annotations
 
@@ -57,10 +57,10 @@ def _load_profile(cfg: dict, allow_sample: bool) -> dict | None:
     sample = ROOT / "profile.example.json"
     if allow_sample and sample.exists():
         print(f"  ! {path} missing -- using {sample.name} for this dry run.")
-        print("    Build the real one: python -m jobhunt profile --resume resume.pdf")
+        print("    Build the real one: python -m scoutai profile --resume resume.pdf")
         return json.loads(sample.read_text(encoding="utf-8"))
 
-    print(f"missing {path} -- run `python -m jobhunt profile --resume <file>` first")
+    print(f"missing {path} -- run `python -m scoutai profile --resume <file>` first")
     return None
 
 
@@ -261,8 +261,8 @@ def cmd_stats(args) -> int:
 def main(argv=None) -> int:
     _load_env()
     p = argparse.ArgumentParser(
-        prog="jobhunt",
-        description="Personal job-search agent. Finds and drafts; never submits.")
+        prog="scoutai",
+        description="ScoutAI: Autonomous career search & application agent. Finds and drafts; never submits.")
     p.add_argument("--config", default="config.yaml")
     sub = p.add_subparsers(dest="cmd", required=True)
 

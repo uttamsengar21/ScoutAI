@@ -71,7 +71,7 @@ Handles LLM output quirks (markdown fences ````json````, conversational preamble
 ScoutAI/
 ├── .github/workflows/
 │   └── daily.yml        # Cloud CI/CD scheduler (08:30 AM IST cron + cache)
-├── jobhunt/
+├── scoutai/
 │   ├── fetch.py         # Pure ATS adapters (Greenhouse, Lever, Ashby)
 │   ├── prefilter.py     # Deterministic regex, country-restricted remote & date filters
 │   ├── store.py         # Deduplication index, re-evaluation logic, tracker & CSV exporter
@@ -114,7 +114,7 @@ Runs 108 unit tests in under a second with zero network dependency.
 
 ### 3. Run Offline Mock Pipeline
 ```bash
-python -m jobhunt run --mock --scorer keyword
+python -m scoutai run --mock --scorer keyword
 ```
 Runs bundled native ATS fixtures through the real parsers, deduplication engine, and HTML generator without requiring any API keys. Open `out/digest.html` to inspect the generated report.
 
@@ -148,19 +148,19 @@ In your GitHub repository, navigate to **Settings → Secrets and variables → 
 
 ```powershell
 # Run regular daily scan
-python -m jobhunt run
+python -m scoutai run
 
 # Send email upon completion
-python -m jobhunt run --send
+python -m scoutai run --send
 
 # Re-evaluate previously seen jobs against updated filters
-python -m jobhunt run --rescreen
+python -m scoutai run --rescreen
 
 # Mark a job as applied after submitting
-python -m jobhunt applied "greenhouse:stripe:8031833"
+python -m scoutai applied "greenhouse:stripe:8031833"
 
 # View funnel stats and generate an updated CSV tracker
-python -m jobhunt stats
+python -m scoutai stats
 ```
 
 The CSV tracker is exported to `out/tracker.csv`, readable by Excel, Google Sheets, or Numbers.

@@ -23,9 +23,9 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from jobhunt import llm, providers
-from jobhunt.fetch import Job
-from jobhunt.providers import LLMError, Provider
+from scoutai import llm, providers
+from scoutai.fetch import Job
+from scoutai.providers import LLMError, Provider
 
 # Profile representing the actual candidate: B.Tech student, 0 industry exp.
 INTERN_PROFILE = {
