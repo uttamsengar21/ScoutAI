@@ -22,7 +22,7 @@ An end-to-end autonomous pipeline that monitors public ATS APIs every morning, f
 
 ---
 
-## 💡 What is ScoutAI?
+##  What is ScoutAI?
 
 Most applicants spend 1–2 hours daily sifting through generic job boards, outdated postings, and recruiter spam. **ScoutAI automates this entire discovery and evaluation cycle.**
 
@@ -34,7 +34,7 @@ It acts as an autonomous personal recruiter:
 
 ---
 
-## ⚡ Architecture & AI Engineering
+##  Architecture & AI Engineering
 
 ```mermaid
 flowchart TD
@@ -65,7 +65,7 @@ Handles LLM output quirks (markdown fences ````json````, conversational preamble
 
 ---
 
-## 🛠️ Project Structure
+##  Project Structure
 
 ```
 ScoutAI/
@@ -92,7 +92,7 @@ ScoutAI/
 
 ---
 
-## 🚀 Quickstart (Local)
+##  Quickstart (Local)
 
 ### 1. Clone & Setup
 ```bash
@@ -120,7 +120,7 @@ Runs bundled native ATS fixtures through the real parsers, deduplication engine,
 
 ---
 
-## ⚙️ Cloud Automation (GitHub Actions)
+##  Cloud Automation (GitHub Actions)
 
 ScoutAI runs completely hands-free in the cloud every weekday at **08:30 AM IST**.
 
@@ -142,7 +142,7 @@ In your GitHub repository, navigate to **Settings → Secrets and variables → 
 
 ---
 
-## 📊 Application Tracker & CLI Commands
+##  Application Tracker & CLI Commands
 
 `seen.json` maintains the state of discovered, screened, and applied jobs so you are never shown duplicates.
 
@@ -167,7 +167,7 @@ The CSV tracker is exported to `out/tracker.csv`, readable by Excel, Google Shee
 
 ---
 
-## 🔒 Security & Privacy
+##  Security & Privacy
 
 - **No Scraping**: Only queries public career APIs intended for public indexing.
 - **Zero Credentials in Git**: `.env`, `seen.json`, `profile.json`, and generated outputs are strictly gitignored.
