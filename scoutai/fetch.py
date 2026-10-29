@@ -165,7 +165,7 @@ def fetch_board(ats: str, slug: str | None = None, company: str | None = None,
         all_jobs = []
         try:
             for page in range(2):
-                payload = {"appliedFacets": {}, "limit": 20, "offset": page * 20, "searchText": ""}
+                payload = {"appliedFacets": {}, "limit": 20, "offset": page * 20, "searchText": "India"}
                 r = sess.post(api_url, json=payload, headers=headers, timeout=TIMEOUT)
                 if r.status_code != 200:
                     break

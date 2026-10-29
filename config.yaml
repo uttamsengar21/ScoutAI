@@ -110,7 +110,7 @@ filters:
 screen_batch_size: 8
 screen_jd_chars: 1400
 draft_jd_chars: 6000
-score_threshold: 7.0
+score_threshold: 6.0
 max_per_digest: 5
 
 # --- paths ------------------------------------------------------------------
