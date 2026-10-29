@@ -7,12 +7,13 @@
 
 companies:
   # =========================================================================
-  # 1. CORE HARDWARE, SEMICONDUCTOR & SILICON GIANTS (Workday & Greenhouse)
+  # 1. CORE HARDWARE, SEMICONDUCTOR, SILICON & ROBOTICS (15)
   # =========================================================================
   - {ats: workday,    tenant: nvidia,           wd: 5, site: NVIDIAExternalCareerSite, name: NVIDIA}              # World leader in GPUs, AI computing & silicon
   - {ats: workday,    tenant: intel,            wd: 1, site: External,                 name: Intel}               # Semiconductor & microprocessor leader
   - {ats: workday,    tenant: micron,           wd: 1, site: External,                 name: Micron Technology}   # Memory & storage semiconductor chips
   - {ats: workday,    tenant: nxp,              wd: 3, site: careers,                  name: NXP Semiconductors}  # Automotive & embedded semiconductor leader
+  - {ats: workday,    tenant: sec,              wd: 3, site: Samsung_Careers,          name: Samsung Electronics} # Global semiconductor, foundry & memory
   - {ats: workday,    tenant: marvell,          wd: 1, site: MarvellCareers,           name: Marvell Technology}  # Data infrastructure & high-speed silicon
   - {ats: workday,    tenant: amat,             wd: 1, site: External,                 name: Applied Materials}   # Materials engineering solutions for chips
   - {ats: workday,    tenant: broadcom,         wd: 1, site: External_Career,         name: Broadcom}            # Semiconductor & infrastructure software
@@ -20,10 +21,12 @@ companies:
   - {ats: greenhouse, slug: asteralabs,                                                name: Astera Labs}         # Semiconductor leader in PCIe/CXL connectivity & silicon
   - {ats: greenhouse, slug: sambanovasystems,                                          name: SambaNova Systems}   # Custom AI silicon & reconfigurable dataflow chips
   - {ats: greenhouse, slug: lattice,                                                   name: Lattice Semi}        # FPGA & low-power programmable logic leader
+  - {ats: greenhouse, slug: samsara,                                                   name: Samsara}             # Connected IoT sensor hardware & platform
+  - {ats: greenhouse, slug: nuro,                                                      name: Nuro}                # Autonomous robotics & embedded systems
   - {ats: lever,      slug: esper,                                                     name: Esper}               # DevOps for dedicated device fleets & embedded
 
   # =========================================================================
-  # 2. TIER-1 GLOBAL PRODUCT & SOFTWARE INFRASTRUCTURE GIANTS
+  # 2. TIER-1 GLOBAL SOFTWARE, CLOUD, DATA & AI LEADERS (43)
   # =========================================================================
   - {ats: workday,    tenant: cisco,            wd: 5, site: Cisco_Careers,            name: Cisco}               # Networking, security & hardware systems
   - {ats: workday,    tenant: adobe,            wd: 5, site: external_experienced,     name: Adobe}               # Creative cloud & digital media software
@@ -43,11 +46,45 @@ companies:
   - {ats: greenhouse, slug: roblox,                                                    name: Roblox}              # Game engine & distributed infrastructure
   - {ats: greenhouse, slug: twilio,                                                    name: Twilio}              # Communications APIs & cloud platform
   - {ats: greenhouse, slug: okta,                                                      name: Okta}                # Enterprise identity & security
-  - {ats: ashby,      slug: notion,                                                    name: Notion}              # Connected workspace (Hyderabad & Global)
-  - {ats: ashby,      slug: atlan,                                                     name: Atlan}               # Modern data governance
+  - {ats: greenhouse, slug: pinterest,                                                 name: Pinterest}           # Visual discovery & distributed backend
+  - {ats: greenhouse, slug: lyft,                                                      name: Lyft}                # Rideshare & high-scale mobility infrastructure
+  - {ats: greenhouse, slug: instacart,                                                 name: Instacart}           # On-demand logistics & grocery technology
+  - {ats: greenhouse, slug: robinhood,                                                 name: Robinhood}           # Consumer fintech & high-throughput trading
+  - {ats: greenhouse, slug: affirm,                                                    name: Affirm}              # Modern fintech payments platform
+  - {ats: greenhouse, slug: chime,                                                     name: Chime}               # Financial technology & consumer banking
+  - {ats: greenhouse, slug: carta,                                                     name: Carta}               # Equity management & financial infrastructure
+  - {ats: greenhouse, slug: gusto,                                                     name: Gusto}               # Modern payroll & HR platform
+  - {ats: greenhouse, slug: dropbox,                                                   name: Dropbox}             # Cloud storage & smart workspace
+  - {ats: greenhouse, slug: boxinc,                                                    name: Box}                 # Enterprise content management & cloud storage
+  - {ats: greenhouse, slug: airtable,                                                  name: Airtable}            # Connected apps & database platform
+  - {ats: greenhouse, slug: brex,                                                      name: Brex}                # Corporate credit & financial software
+  - {ats: greenhouse, slug: gleanwork,                                                 name: Glean}               # Enterprise AI search & knowledge discovery
+  - {ats: greenhouse, slug: pagerduty,                                                 name: PagerDuty}           # Digital operations management & SRE
+  - {ats: greenhouse, slug: workato,                                                   name: Workato}             # Enterprise automation & integration platform
+  - {ats: greenhouse, slug: launchdarkly,                                              name: LaunchDarkly}        # Feature management & software delivery
+  - {ats: greenhouse, slug: checkr,                                                    name: Checkr}              # People infrastructure & background technology
+  - {ats: greenhouse, slug: coursera,                                                  name: Coursera}            # Online learning platform & educational tech
+  - {ats: greenhouse, slug: duolingo,                                                  name: Duolingo}            # Language learning platform & mobile systems
+  - {ats: greenhouse, slug: discord,                                                   name: Discord}             # Real-time communications & voice infrastructure
+  - {ats: greenhouse, slug: circleci,                                                  name: CircleCI}            # CI/CD platform & software automation
+  - {ats: greenhouse, slug: canonical,                                                 name: Canonical}           # Ubuntu Linux & open-source infrastructure
+  - {ats: greenhouse, slug: cockroachlabs,                                             name: CockroachDB}         # Distributed SQL database systems
+  - {ats: greenhouse, slug: grafanalabs,                                               name: Grafana Labs}        # Open observability & monitoring platform
+  - {ats: greenhouse, slug: jetbrains,                                                 name: JetBrains}           # Developer tools & IDE engineering
 
   # =========================================================================
-  # 3. TOP INDIAN TECH & FINTECH LEADERS
+  # 3. MODERN WORKSPACE, FAST-GROWING AI & DEVTOOLS (7)
+  # =========================================================================
+  - {ats: ashby,      slug: notion,                                                    name: Notion}              # Connected workspace (Hyderabad & Global)
+  - {ats: ashby,      slug: atlan,                                                     name: Atlan}               # Modern data governance
+  - {ats: ashby,      slug: ramp,                                                      name: Ramp}                # Finance automation & corporate platform
+  - {ats: ashby,      slug: linear,                                                    name: Linear}              # High-performance issue tracking & product tool
+  - {ats: ashby,      slug: cohere,                                                    name: Cohere}              # Enterprise AI & large language models
+  - {ats: ashby,      slug: perplexity,                                                name: Perplexity AI}       # AI conversational search engine
+  - {ats: ashby,      slug: supabase,                                                  name: Supabase}            # Open-source Firebase alternative & backend
+
+  # =========================================================================
+  # 4. TOP INDIAN TECH & FINTECH LEADERS (8)
   # =========================================================================
   - {ats: greenhouse, slug: razorpaysoftwareprivatelimited,                             name: Razorpay}            # Indian fintech leader
   - {ats: greenhouse, slug: groww,                                                     name: Groww}               # Indian investment platform
