@@ -27,7 +27,8 @@ companies:
   - {ats: ashby,      slug: atlan,                          name: Atlan}               # Modern data governance
   - {ats: ashby,      slug: notion,                         name: Notion}              # Connected workspace
 
-  # --- Core Hardware, Semiconductor, Compute & Embedded ---
-  - {ats: greenhouse, slug: tenstorrent,                    name: Tenstorrent}         # High-performance RISC-V AI processors & silicon
-  - {ats: greenhouse, slug: asteralabs,                     name: Astera Labs}         # Semiconductor leader in PCIe/CXL connectivity & silicon
+  # --- Core Hardware, Semiconductor, Silicon & Embedded ---
+  - {ats: greenhouse, slug: tenstorrent,                    name: Tenstorrent}         # High-performance RISC-V AI processors & silicon (124 jobs)
+  - {ats: greenhouse, slug: asteralabs,                     name: Astera Labs}         # Semiconductor leader in PCIe/CXL connectivity & silicon (172 jobs)
+  - {ats: greenhouse, slug: sambanovasystems,               name: SambaNova Systems}   # AI silicon hardware & reconfigurable dataflow chips (71 jobs)
   - {ats: lever,      slug: esper,                          name: Esper}               # DevOps for dedicated device fleets & embedded
