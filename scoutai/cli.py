@@ -217,8 +217,11 @@ def cmd_run(args) -> int:
 
     sent = False
     if args.send:
-        try:
-            mailer.send(subject, doc)
+        if not shortlist:
+            print("  0 jobs scored >= threshold today -- email skipped (no matches to send).")
+        else:
+            try:
+                mailer.send(subject, doc)
             sent = True
             print("  email confirmed sent")
         except Exception as e:  # bad app password, blocked port, offline
