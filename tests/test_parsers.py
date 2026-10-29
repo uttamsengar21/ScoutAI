@@ -525,3 +525,23 @@ def test_store_export_csv_produces_valid_file(tmp_path):
     assert len(rows) == 1
     assert rows[0]["job_id"] == j.job_id
     assert rows[0]["score"] == "7.0"
+
+
+def test_parse_workday_extracts_correct_fields():
+    from scoutai.fetch import parse_workday
+    mock_body = {
+        "total": 1,
+        "jobPostings": [{
+            "title": "Hardware Intern - ASIC Design",
+            "locationsText": "Bengaluru, India",
+            "externalPath": "/job/Bengaluru-India/Hardware-Intern_JR12345",
+            "postedOn": "Posted 2 Days Ago"
+        }]
+    }
+    jobs = parse_workday("intel", 1, "External", "Intel", mock_body)
+    assert len(jobs) == 1
+    assert jobs[0].company == "Intel"
+    assert jobs[0].title == "Hardware Intern - ASIC Design"
+    assert jobs[0].location == "Bengaluru, India"
+    assert jobs[0].job_id == "workday:intel:JR12345"
+    assert "intel.wd1.myworkdayjobs.com/en-US/External/job" in jobs[0].url

@@ -123,6 +123,25 @@ def parse_ashby(slug: str, company: str, body: Any) -> list[Job]:
     return out
 
 
+def parse_workday(tenant: str, wd: int | str, site: str, company: str, body: Any) -> list[Job]:
+    out = []
+    base_url = f"https://{tenant}.wd{wd}.myworkdayjobs.com/en-US/{site}"
+    for j in (body or {}).get("jobPostings", []):
+        ext_path = j.get("externalPath") or ""
+        job_code = ext_path.split("_")[-1] if "_" in ext_path else ext_path
+        out.append(Job(
+            job_id=f"workday:{tenant}:{job_code}",
+            ats="workday",
+            company=company,
+            title=(j.get("title") or "").strip(),
+            location=(j.get("locationsText") or "").strip(),
+            url=f"{base_url}{ext_path}",
+            description=(j.get("title") or "") + " " + (j.get("locationsText") or ""),
+            posted_at=j.get("postedOn"),
+        ))
+    return out
+
+
 ENDPOINTS = {
     "greenhouse": ("https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true", parse_greenhouse),
     "lever":      ("https://api.lever.co/v0/postings/{slug}?mode=json", parse_lever),
@@ -130,19 +149,44 @@ ENDPOINTS = {
 }
 
 
-def fetch_board(ats: str, slug: str, company: str | None = None,
-                session: requests.Session | None = None) -> list[Job]:
+def fetch_board(ats: str, slug: str | None = None, company: str | None = None,
+                session: requests.Session | None = None,
+                config: dict | None = None) -> list[Job]:
     """Hit one company's public board. Returns [] on any failure (never raises)."""
+    cfg = config or {}
+    sess = session or requests
+
+    if ats == "workday":
+        tenant = cfg.get("tenant") or slug or ""
+        wd = cfg.get("wd", 1)
+        site = cfg.get("site", "External")
+        api_url = f"https://{tenant}.wd{wd}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/jobs"
+        headers = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
+        all_jobs = []
+        try:
+            for page in range(2):
+                payload = {"appliedFacets": {}, "limit": 20, "offset": page * 20, "searchText": ""}
+                r = sess.post(api_url, json=payload, headers=headers, timeout=TIMEOUT)
+                if r.status_code != 200:
+                    break
+                page_jobs = parse_workday(tenant, wd, site, company or tenant, r.json())
+                all_jobs.extend(page_jobs)
+                if len(page_jobs) < 20:
+                    break
+            return all_jobs
+        except Exception as e:
+            print(f"  ! workday/{tenant} -> {type(e).__name__}: {e}")
+            return []
+
     if ats not in ENDPOINTS:
         raise ValueError(f"unknown ATS: {ats}")
     url_tpl, parser = ENDPOINTS[ats]
-    sess = session or requests
     try:
         r = sess.get(url_tpl.format(slug=slug), headers=UA, timeout=TIMEOUT)
         if r.status_code != 200:
             print(f"  ! {ats}/{slug} -> HTTP {r.status_code}")
             return []
-        return parser(slug, company or slug, r.json())
+        return parser(slug or "", company or slug or "", r.json())
     except Exception as e:  # dead slug, rate limit, network blip
         print(f"  ! {ats}/{slug} -> {type(e).__name__}: {e}")
         return []
@@ -152,9 +196,10 @@ def fetch_all(companies: Iterable[dict], sleep: float = 0.25) -> list[Job]:
     jobs: list[Job] = []
     session = requests.Session()
     for c in companies:
-        got = fetch_board(c["ats"], c["slug"], c.get("name"), session=session)
+        slug = c.get("slug") or c.get("tenant") or ""
+        got = fetch_board(c["ats"], slug, c.get("name"), session=session, config=c)
         if got:
-            print(f"  {c.get('name') or c['slug']:<28} {len(got):>4} jobs  ({c['ats']})")
+            print(f"  {c.get('name') or slug:<28} {len(got):>4} jobs  ({c['ats']})")
         jobs.extend(got)
         time.sleep(sleep)
     return jobs
