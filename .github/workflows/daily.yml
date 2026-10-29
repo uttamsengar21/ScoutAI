@@ -67,7 +67,7 @@ jobs:
           SCREEN_PROVIDER: ${{ vars.SCREEN_PROVIDER }}
           DRAFT_PROVIDER: ${{ vars.DRAFT_PROVIDER }}
           SCREEN_MODEL: ${{ vars.SCREEN_MODEL || 'gemini-3.5-flash-lite' }}
-          DRAFT_MODEL: ${{ vars.DRAFT_MODEL || 'gemini-3.5-flash' }}
+          DRAFT_MODEL: ${{ vars.DRAFT_MODEL || 'gemini-3.5-flash-lite' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
