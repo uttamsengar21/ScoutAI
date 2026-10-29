@@ -222,16 +222,16 @@ def cmd_run(args) -> int:
         else:
             try:
                 mailer.send(subject, doc)
-            sent = True
-            print("  email confirmed sent")
-        except Exception as e:  # bad app password, blocked port, offline
-            etype = type(e).__name__
-            msg = str(e)
-            # Redact anything that looks like a password or key in the error message.
-            print(f"  ! email failed ({etype}: {msg}) -- digest still on disk")
-            print("  tip: verify SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in .env")
-            print("       Gmail requires an App Password (not your login password).")
-            print("       Port 587 needs STARTTLS; port 465 needs SSL/TLS.")
+                sent = True
+                print("  email confirmed sent")
+            except Exception as e:  # bad app password, blocked port, offline
+                etype = type(e).__name__
+                msg = str(e)
+                # Redact anything that looks like a password or key in the error message.
+                print(f"  ! email failed ({etype}: {msg}) -- digest still on disk")
+                print("  tip: verify SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in .env")
+                print("       Gmail requires an App Password (not your login password).")
+                print("       Port 587 needs STARTTLS; port 465 needs SSL/TLS.")
     else:
         print("  --send not passed, email skipped")
 
