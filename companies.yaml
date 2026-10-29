@@ -8,25 +8,26 @@
 #   https://boards.greenhouse.io/<slug>        -> ats: greenhouse
 #   https://jobs.lever.co/<slug>               -> ats: lever
 #   https://jobs.ashbyhq.com/<slug>            -> ats: ashby
-#
-# Every board listed below has been verified via direct HTTP 200 checks on 2026-10-28.
-# Companies that migrate ATS or do not use Greenhouse/Lever/Ashby are removed.
 
 companies:
-  # --- Confirmed Tech Employers with Active Indian Presence / Global Engineering ---
-  - {ats: greenhouse, slug: stripe,                         name: Stripe}              # Confirmed: active Software Engineer Intern in Bengaluru
-  - {ats: greenhouse, slug: coinbase,                       name: Coinbase}            # Confirmed: 220+ active engineering postings
-  - {ats: greenhouse, slug: thoughtworks,                   name: Thoughtworks}        # Confirmed: Graduate Developer hiring track
-  - {ats: greenhouse, slug: cloudflare,                     name: Cloudflare}          # Confirmed: 450+ postings
-  - {ats: greenhouse, slug: razorpaysoftwareprivatelimited,  name: Razorpay}            # Confirmed: Indian fintech leader
-  - {ats: greenhouse, slug: rubrik,                         name: Rubrik}              # Confirmed: Bangalore & Pune hubs
-  - {ats: greenhouse, slug: databricks,                     name: Databricks}          # Confirmed: Bengaluru engineering hub
-  - {ats: greenhouse, slug: inmobi,                         name: InMobi}              # Confirmed: Bangalore tech leader
-  - {ats: greenhouse, slug: groww,                          name: Groww}               # Confirmed: Indian fintech leader
-  - {ats: lever,      slug: cred,                           name: CRED}                # Confirmed: Bangalore fintech
-  - {ats: lever,      slug: meesho,                         name: Meesho}              # Confirmed: Bangalore tech
-  - {ats: lever,      slug: mindtickle,                     name: Mindtickle}          # Confirmed: Pune SaaS hub
-  - {ats: lever,      slug: zeta,                           name: Zeta}                # Confirmed: Bangalore fintech / banking tech
-  - {ats: ashby,      slug: atlan,                          name: Atlan}               # Confirmed: Modern data workspace
-  - {ats: ashby,      slug: notion,                         name: Notion}              # Confirmed: Hyderabad engineering hub + global
-  - {ats: greenhouse, slug: tenstorrent,                    name: Tenstorrent}         # Confirmed: High-performance compute
+  # --- Software, Fintech, Data & Cloud Platforms ---
+  - {ats: greenhouse, slug: stripe,                         name: Stripe}              # Global fintech / infrastructure (active Bangalore intern)
+  - {ats: greenhouse, slug: coinbase,                       name: Coinbase}            # Crypto / backend systems
+  - {ats: greenhouse, slug: thoughtworks,                   name: Thoughtworks}        # Global software consultancy
+  - {ats: greenhouse, slug: cloudflare,                     name: Cloudflare}          # Networking, distributed systems, edge compute
+  - {ats: greenhouse, slug: razorpaysoftwareprivatelimited,  name: Razorpay}            # Indian fintech leader
+  - {ats: greenhouse, slug: rubrik,                         name: Rubrik}              # Enterprise cloud data management
+  - {ats: greenhouse, slug: databricks,                     name: Databricks}          # Data intelligence, spark, distributed systems
+  - {ats: greenhouse, slug: inmobi,                         name: InMobi}              # AdTech & mobile platform
+  - {ats: greenhouse, slug: groww,                          name: Groww}               # Indian investment platform
+  - {ats: lever,      slug: cred,                           name: CRED}                # High-trust fintech platform
+  - {ats: lever,      slug: meesho,                         name: Meesho}              # E-commerce marketplace
+  - {ats: lever,      slug: mindtickle,                     name: Mindtickle}          # Sales enablement SaaS
+  - {ats: lever,      slug: zeta,                           name: Zeta}                # Banking tech & next-gen core banking
+  - {ats: ashby,      slug: atlan,                          name: Atlan}               # Modern data governance
+  - {ats: ashby,      slug: notion,                         name: Notion}              # Connected workspace
+
+  # --- Core Hardware, Semiconductor, Compute & Embedded ---
+  - {ats: greenhouse, slug: tenstorrent,                    name: Tenstorrent}         # High-performance RISC-V AI processors & silicon
+  - {ats: greenhouse, slug: asteralabs,                     name: Astera Labs}         # Semiconductor leader in PCIe/CXL connectivity & silicon
+  - {ats: lever,      slug: esper,                          name: Esper}               # DevOps for dedicated device fleets & embedded

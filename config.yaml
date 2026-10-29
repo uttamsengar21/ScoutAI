@@ -1,5 +1,5 @@
 # ScoutAI configuration tuned for a third-year B.Tech student seeking
-# software internships, backend/full-stack roles, and suitable new-grad roles.
+# software internships, backend/full-stack roles, and core hardware/VLSI opportunities.
 # Everything tunable lives here — no editing Python.
 #
 # Tune filters first. These deterministic rules reduce the number of jobs
@@ -9,7 +9,7 @@ filters:
   # Regexes match the job title only, case-insensitively.
   # A title must match at least one include and zero excludes.
   include_titles:
-    # Core software engineering roles
+    # --- Core software engineering roles ---
     - '\b(software|backend|back-end|full[ -]?stack|web|application|platform|cloud|infrastructure|systems|distributed)\b.*\b(engineer|developer|intern|internship|trainee|apprentice)\b'
     - '\b(engineer|developer)\b.*\b(software|backend|back-end|full[ -]?stack|web|application|platform|cloud|infrastructure|systems|distributed)\b'
     - '\bsde\b'
@@ -41,21 +41,37 @@ filters:
     - '\bsite reliability engineer\b'
     - '\bsre\b'
     - '\bmember of technical staff\b'
-    # Internship and university hiring titles that may omit a specialty
-    - '\b(engineering|technology|software|developer) intern\b'
-    - '\b(intern|internship)\b.*\b(software|engineering|developer|backend|back-end|full[ -]?stack|web)\b'
-    - '\bgraduate software engineer\b'
-    - '\bnew grad(uate)? software engineer\b'
-    - '\bentry[- ]level software engineer\b'
-    - '\bjunior software engineer\b'
-    - '\bassociate software engineer\b'
-    - '\bgraduate engineer trainee\b'
-    # Optional adjacent systems/C++ track
+
+    # --- Core Hardware, VLSI, Silicon, & Verification track ---
+    - '\b(rtl|digital\s+design|digital\s+ic|logic\s+design|asic|fpga|soc|silicon|hardware|dft|verification|dv|design\s+verification|physical\s+design)\b.*\b(engineer|intern|internship|trainee|apprentice|co-op)\b'
+    - '\b(engineer|developer|intern|internship)\b.*\b(rtl|digital\s+design|asic|fpga|silicon|hardware|dft|verification|vlsi)\b'
+    - '\b(hardware|silicon|chip|semiconductor|vlsi)\b.*\b(engineer|intern|internship|trainee)\b'
+    - '\b(soc|asic|fpga|dft|eda)\s+(design\s+)?(engineer|intern|trainee)\b'
+    - '\brtl\s+(design\s+)?(engineer|intern)\b'
+    - '\bdigital\s+(design|ic|verification)\s+(engineer|intern)\b'
+    - '\bhardware\s+(engineer|intern|internship)\b'
+    - '\bsilicon\s+(design|validation|engineer|intern)\b'
+    - '\bverification\s+(engineer|intern)\b'
+    - '\bdesign\s+verification\s+(engineer|intern)\b'
+    - '\bdft\s+(engineer|intern)\b'
+
+    # --- Systems, Embedded & C++ track ---
     - '\bnetwork(ing)?\s+(software\s+)?engineer\b'
     - '\b(kernel|embedded|firmware|driver|packet|dataplane|data plane)\b.*\b(engineer|intern)\b'
     - '\b(performance|systems) engineer\b'
     - '\bc\+\+\b.*\b(engineer|intern)\b'
     - '\b(engineer|intern)\b.*\bc\+\+\b'
+
+    # --- University / Internship Hiring ---
+    - '\b(engineering|technology|software|developer|hardware|silicon) intern\b'
+    - '\b(intern|internship)\b.*\b(software|engineering|developer|backend|back-end|full[ -]?stack|hardware|silicon|vlsi)\b'
+    - '\bgraduate software engineer\b'
+    - '\bgraduate hardware engineer\b'
+    - '\bnew grad(uate)? (software|hardware) engineer\b'
+    - '\bentry[- ]level (software|hardware) engineer\b'
+    - '\bjunior (software|hardware) engineer\b'
+    - '\bassociate (software|hardware) engineer\b'
+    - '\bgraduate engineer trainee\b'
 
   # Drop senior/management and unrelated roles even if an include matched.
   exclude_titles:
@@ -81,6 +97,7 @@ filters:
     - delhi
     - mumbai
     - chennai
+    - ahmedabad
     - jalandhar
 
   # Allow remote roles even if their location string lacks an Indian city.
@@ -102,4 +119,3 @@ profile_file: profile.json
 seen_file: seen.json
 digest_file: out/digest.html
 tracker_csv: out/tracker.csv
-

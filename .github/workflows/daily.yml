@@ -10,6 +10,10 @@ on:
         description: "Skip the email, just build the digest artifact"
         type: boolean
         default: false
+      rescreen:
+        description: "Force re-screen previously seen jobs"
+        type: boolean
+        default: false
 
 concurrency:
   group: scoutai-daily
@@ -46,11 +50,15 @@ jobs:
         env:
           PROFILE_JSON: ${{ secrets.PROFILE_JSON }}
         run: |
-          if [ -z "$PROFILE_JSON" ]; then
-            echo "::error::PROFILE_JSON secret is empty — please add it in Repository Settings -> Secrets"
+          if [ -n "$PROFILE_JSON" ]; then
+            printf '%s' "$PROFILE_JSON" > profile.json
+            echo "Using profile.json from GitHub Secrets"
+          elif [ -f profile.json ]; then
+            echo "Using committed profile.json from repository"
+          else
+            echo "::error::No profile.json found in secrets or repository"
             exit 1
           fi
-          printf '%s' "$PROFILE_JSON" > profile.json
           python -c "import json;json.load(open('profile.json'));print('profile.json parsed OK')"
 
       - name: Run the pipeline
@@ -69,11 +77,14 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
         run: |
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            python -m scoutai run
-          else
-            python -m scoutai run --send
+          ARGS=""
+          if [ "${{ inputs.rescreen }}" = "true" ]; then
+            ARGS="$ARGS --rescreen"
           fi
+          if [ "${{ inputs.dry_run }}" != "true" ]; then
+            ARGS="$ARGS --send"
+          fi
+          python -m scoutai run $ARGS
 
       - name: Upload digest artifact
         if: always()

@@ -121,13 +121,16 @@ def build_profile(resume_bytes: bytes | None = None, resume_text: str | None = N
 # ----------------------------------------------------------------- screen ---
 
 SCREEN_SYSTEM = """You screen job postings for one candidate who is a third-year
-undergraduate student (B.Tech, graduating May 2028) seeking software engineering
-internships and suitable entry-level/new-grad roles. Be accurate, not encouraging.
+undergraduate student (B.Tech in Electronics and VLSI Engineering, graduating May 2028).
+The candidate is actively pursuing BOTH:
+  1) Core Hardware, RTL Design, Digital Verification (DV), ASIC, FPGA, Silicon, and Embedded roles
+  2) Software Engineering roles (SDE, SWE, Backend, Full-Stack, Distributed Systems, Python)
+Be accurate, not encouraging.
 
 SCORING RUBRIC (0-10):
   9-10  Excellent fit: posting explicitly targets students/interns at this level,
-        the candidate's tech stack matches, no blocking eligibility restrictions.
-  7-8   Good fit: internship or entry-level role, strong technology overlap, minor
+        the candidate's tech stack (hardware or software) matches, no blocking eligibility restrictions.
+  7-8   Good fit: internship or entry-level role, strong technology overlap in either track, minor
         addressable gaps.
   5-6   Plausible: some relevant skills, but real gaps (unfamiliar stack, stated
         experience requirement the candidate cannot fully meet, partial location fit).
@@ -137,10 +140,10 @@ SCORING RUBRIC (0-10):
 CRITICAL EVALUATION RULES:
 1. An internship or new-grad role is NOT a seniority mismatch for this student.
    Evaluate on tech fit and eligibility -- not on missing professional experience.
-2. The candidate has ZERO years of industry experience but has built two full-stack
-   deployed projects (MERN real-time chat app, Employee Management System with RBAC
-   and event-driven background jobs) and solved 500+ LeetCode problems. Zero industry
-   experience does NOT mean zero practical ability.
+2. The candidate has ZERO years of industry experience but has substantial hands-on project depth:
+   - Hardware/VLSI: 5-Stage Pipelined RISC-V Processor (Verilog), UART with class-based SystemVerilog testbenches (100% functional coverage in Vivado), Sobel Hardware Accelerator, and Scan-Chain DFT insertion with fault-injection testbench.
+   - Software: ScoutAI (autonomous LLM agent with 108 pytest tests), QuickChat (MERN with WebSockets), Employee Management System (RBAC + Inngest background jobs), and 500+ LeetCode problems.
+   Zero industry experience does NOT mean zero practical ability. Evaluate against whichever domain the job belongs to!
 3. A role requiring "2+ years of professional experience" IS a real gap -- score <=5.
 4. A full-time permanent role in US, UK, Ireland, or another country where the
    candidate cannot legally work as a student intern -- score <=3.
@@ -214,6 +217,10 @@ DRAFT_SYSTEM = """You prepare an application kit for one job.
 Hard rule: never invent experience. Every claim must trace to something in the
 candidate profile. If the profile does not support a claim, it goes in `gaps`,
 not in a bullet.
+
+Tailor specifically to the job's domain:
+- For Hardware/VLSI/Embedded jobs: Ground bullets in the candidate's RISC-V datapath, UART SystemVerilog verification (driver/monitor/scoreboard), Sobel accelerator, or Scan-Chain DFT projects.
+- For Software/Backend/Full-Stack jobs: Ground bullets in ScoutAI, QuickChat, Employee Management, and LeetCode problem-solving experience.
 
 Return ONLY a JSON object, no prose:
 {
